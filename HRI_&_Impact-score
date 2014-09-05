@@ -1,0 +1,158 @@
+
+## I- Building maps with GRASS
+###############################
+
+# From impact score maps (from Buchanan et al.,5km res)
+#######################################################
+
+gnome terminal &
+hierba2.sh # = grass7 &
+
+
+# 1- Import maps
+#~~~~~~~~~~~~~~~~
+
+# WORDWILDE : create folder Worldwide and import impact score map (projection = mollweide)
+	# GRASS 
+cd Raster/Forest/Worldwide/
+r.in.gdal in=impact_score.tif out=impact_score
+
+	# raster info
+r.info impact_score
+r.univar impact_score
+r.describe impact_score
+
+# AFRICA : crop the impact_score of african area (projection already in moll)
+	# Arcgis : 1. create a shapefile from the impact_score.tif 
+	#		   2. select the area of interest, extract the data (data => export data)
+	#		   3. clip the raster file with the shapefile to have an impact score raster map from Africa
+
+# 2- Transform maps
+#~~~~~~~~~~~~~~~~~~~
+
+cd Raster/forest/Africa
+
+	# Af_forest => replace 0 until 1 by 0 (forest=0, continen+ocean = NULL)
+r.reclass input=Africa_moll output=Af_forest rules="r.reclass.rules_forest_cover2.txt"
+r.pintame Af_forest
+r.out.gdal in=Af_forest out=Af_forest.tif
+
+	# Af_forest_grid_50km => 50km grid shapefile => 50km grid raster
+		# QGis : vector grid of african forest => polygon to create grid shapefile "af_forest_grid_50km"
+			# Create a shp grid with Vector => grid => 50000 m res : grid_50km
+			# Polygonise the Af_forest raster map to have af_forest_contour.shp
+			# Clip the af_forest_contour.shp with Af_forest_contour.shp : af_forest_grid_50km.shp
+			
+		# GRASS : import vector
+v.in.ogr dsn=af_forest_grid_50km.shp out=af_forest_grid_50km -o # import vector
+
+			# vector info
+d.mon wx0
+d.vect map=af_forest_grid_50km
+
+			# rasterize (or using ArcGis rasterize)
+v.to.rast in=af_forest_grid_50km out=af_forest_grid_50km use=attr attrcolumn=ID labelcol=CELL_VALUE
+
+			# raster info
+r.info af_forest_grid_50km
+d.mon wx1
+d.rast map=af_forest_grid_50km
+
+			# export raster in .tif
+r.out.gdal in=af_forest_grid_50km out=Af_forest_grid_50km.tif
+
+	# af_ecoregs_forest => ecoregions inside forested areas
+		# QGis : crop the worldwilde shapefile of ecoregions from javier with Af_forest
+
+
+## II- Computing HRI - Preprocessing and Processing with PYTHON
+###############################################################
+
+# 1- Preprocessing
+#~~~~~~~~~~~~~~~~~~
+
+gnome terminal &
+python2.7.sh
+
+hierba2.sh
+v.to.rast in=Af_forested_ecoregs out=Af_forested_ecoregs use=attr attrcolumn=ID
+r.mapcalc 'Af_ecoregs_forest2 = round(Af_ecoregs_forest)'
+r.colors map=Af_ecoregs_forest2 col=random
+
+g.mapsets -s #link mapsets
+cd eHabpy-graeme # directory to use Javier python script
+git pull #to update changes inside directory
+
+python2.7.sh
+import os
+os.getcwd()      # Return the current working directory
+os.chdir('eHabpy-5km-moll/ecoregs/')   # Change current working directory
+import ecoreg_buffers_loop #import each ecoregs from Af_ecoregs_forest.shp
+exit() #exit pyhton
+
+cd pas #change directory
+
+python2.7.sh
+import os
+os.chdir('eHabpy/pas_80km/')
+import subpas_loop_buffer #import each polygone from Af_forest_grid_50km.shp
+exit()
+
+# 2- Processing
+#~~~~~~~~~~~~~~~
+
+cd eHabpy/results
+git pull
+python2.7.sh
+
+from ehab import * #in leberro/eHabpy/results import HRI computing for each polygon (=window). 2 files : _lp.tif and .tif
+				   # ne marche pas pour le faire avec fenetre de 80km leberro/eHabpy/results_80km 
+
+## III- Transform output to do mosaic with GRASS
+################################################
+
+# 1- Import rasters in GRASS
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# create a list to work with all rasters files
+
+d.mon wx0
+g.region -p # g.region res=5000
+cd eHabpy/results
+
+ls *.tif|grep -v lp|fmt -1 > list.csv # create a .csv with a list with all files .tif from directory, without lp, one column
+cp list.csv list2.csv # copy the list
+gedit list_final.csv # modify the script
+paste list.csv list2.csv > list-final.csv # paste a second line inside the script, the resulting scipt is called > list-final.csv
+head list_final.csv
+rowcount.sh list_final.csv #to know how may rows
+
+awk '{print "r.in.gdal -oe in="$1" out="$2"}' list_final.csv # do the function r.in.gdal with all the files using the list $ = colonne ex : $1 = col 1
+
+awk '{print "r.in.gdal -oe in="$1" out="$2" --overwrite"}' list_final.csv |sh # pr rendre la commande executable
+
+# select higher HRI value
+	# Arcgis
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
