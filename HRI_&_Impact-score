@@ -106,7 +106,7 @@ git pull
 python2.7.sh
 
 from ehab import * #in leberro/eHabpy/results import HRI computing for each polygon (=window). 2 files : _lp.tif and .tif
-				   # ne marche pas pour le faire avec fenetre de 80km leberro/eHabpy/results_80km 
+
 
 ## III- Transform output to do mosaic with GRASS
 ################################################
