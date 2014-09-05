@@ -1,7 +1,7 @@
 # HRI & Impact Score (birds endemicity)
 ==================
 
-**Objective** : to see where are the most "unic" area in Africa, and to see if there is a trend between these areas and forest birds endemicity
+**Objective** : to see where are the most "unic" area in Africa (according to environmental variables), and to see if there is a trend between these areas and forest birds endemicity
 
 **Hypothesis** : habitat which are not similar to others would have more endemic species than common habitats
 
