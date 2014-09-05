@@ -12,7 +12,7 @@
 
 From worlwilde *impact_score* map : ext= worldwilde, res= 5 km, proj= longlat (Buchanan et al., 2011) :
 
-Transformation (ArcGis) : ext= africa, res= 5km, proj= mollweider 
+Transformation : ext= africa, res= 5km, proj= mollweider 
 
 **Raster :**
 * *Af_impact_score* : clip impact score map with *af_forest*
