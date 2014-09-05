@@ -15,7 +15,7 @@ From worlwilde *impact_score* map : ext= worldwilde, res= 5 km, proj= longlat (B
 Transformation (ArcGis) : ext= africa, res= 5km, proj= mollweider 
 
 **Raster :**
-* *Af_impact_score* : clip impact score map with *af_forest* (Qgis)
+* *Af_impact_score* : clip impact score map with *af_forest*
 
 **Vector :**
 * *af_forest* : forested area in Africa
